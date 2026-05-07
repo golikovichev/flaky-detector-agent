@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flaky-detector-agent"
+version = "0.1.0"
+description = "Detect flaky tests from CI history and propose fixes via an LLM agent."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+keywords = ["pytest", "flaky", "ci", "testing", "agent", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[[project.authors]]
+name = "Mikhail Golikov"
+email = "golikovichev@gmail.com"
+
+[project.urls]
+Homepage = "https://github.com/golikovichev/flaky-detector-agent"
+Repository = "https://github.com/golikovichev/flaky-detector-agent"
+Issues = "https://github.com/golikovichev/flaky-detector-agent/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.scripts]
+flaky-detector = "flaky_detector.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/flaky_detector"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
