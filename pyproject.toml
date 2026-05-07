@@ -37,6 +37,9 @@ Issues = "https://github.com/golikovichev/flaky-detector-agent/issues"
 dev = [
     "pytest>=7.0",
 ]
+llm = [
+    "openai>=1.0",
+]
 
 [project.scripts]
 flaky-detector = "flaky_detector.cli:main"
