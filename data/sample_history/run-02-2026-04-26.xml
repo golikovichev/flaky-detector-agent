@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<testsuites>
+  <testsuite name="regression-suite" timestamp="2026-04-26T09:00:00" run-id="ci-build-1002" tests="9">
+    <testcase classname="tests.test_login" name="test_login_concurrent_session" time="1.5">
+      <failure message="AssertionError: expected 200, got 503. Race condition on session table." type="AssertionError">Stack trace omitted in sample data</failure>
+    </testcase>
+    <testcase classname="tests.test_checkout" name="test_checkout_timeout" time="1.5"/>
+    <testcase classname="tests.test_search" name="test_search_index_warmup" time="1.5"/>
+    <testcase classname="tests.test_login" name="test_login_basic" time="1.5"/>
+    <testcase classname="tests.test_users" name="test_create_user" time="1.5"/>
+    <testcase classname="tests.test_users" name="test_delete_user" time="1.5"/>
+    <testcase classname="tests.test_health" name="test_status_endpoint" time="1.5"/>
+    <testcase classname="tests.test_legacy" name="test_old_api_xml_format" time="1.5">
+      <failure message="DeprecationWarning: XML response format removed in v2." type="AssertionError">Stack trace omitted in sample data</failure>
+    </testcase>
+    <testcase classname="tests.test_billing" name="test_invoice_generation" time="1.5"/>
+  </testsuite>
+</testsuites>
