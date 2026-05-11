@@ -9,6 +9,7 @@ from pathlib import Path
 from flaky_detector import __version__
 from flaky_detector.detector import detect_flaky
 from flaky_detector.parser import parse_directory, parse_junit_xml
+from flaky_detector.quarantine import create_quarantine_pr
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -32,6 +33,28 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=14,
         help="Sliding window size in days (default: 14).",
+    )
+    parser.add_argument(
+        "--open-pr",
+        action="store_true",
+        help="After detection, apply @pytest.mark.flaky markers and open a quarantine PR via `gh`.",
+    )
+    parser.add_argument(
+        "--dry-run-pr",
+        action="store_true",
+        help="With --open-pr: apply markers locally and print the PR body, skip git/gh calls.",
+    )
+    parser.add_argument(
+        "--tests-root",
+        type=Path,
+        default=Path("tests"),
+        help="Root directory where pytest test files live (default: tests).",
+    )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path("."),
+        help="Repo root passed to git and gh (default: current dir).",
     )
     parser.add_argument(
         "--version",
@@ -76,6 +99,25 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(f"      pattern: {last_outcomes}")
         print()
+
+    if args.open_pr or args.dry_run_pr:
+        result = create_quarantine_pr(
+            verdicts,
+            repo_root=args.repo_root,
+            tests_root=args.tests_root,
+            dry_run=args.dry_run_pr or not args.open_pr,
+        )
+        print(f"Branch: {result.branch_name}")
+        applied = sum(1 for e in result.edits if e.status == "applied")
+        already = sum(1 for e in result.edits if e.status == "already-marked")
+        missing = sum(1 for e in result.edits if e.status in {"file-missing", "function-missing"})
+        print(f"Markers: {applied} applied, {already} already present, {missing} skipped.")
+        if result.dry_run:
+            print("Dry run, no git or gh calls made. PR body preview:")
+            print("---")
+            print(result.pr_body)
+        elif result.pr_url:
+            print(f"Opened PR: {result.pr_url}")
 
     return 0
 

@@ -63,13 +63,31 @@ Three modules.
 
 `detector.py` groups runs per test and sorts by timestamp. It slides a window over the history, counts flips inside the window, then ranks results by flip count.
 
-`agent.py` is the LLM hook. It takes a verdict and returns a `FixProposal` with a quarantine marker plus a suggested code direction. The default stub returns a `@pytest.mark.flaky(reruns=2)` plus a TODO comment. The hackathon-day work swaps the stub for a Codex call that reads test source and failure messages, then returns a concrete patch.
+`agent.py` is the LLM hook. It takes a verdict and returns a `FixProposal` with a quarantine marker plus a suggested code direction. The default stub returns a `@pytest.mark.flaky(reruns=2)` plus a TODO comment. With `OPENAI_API_KEY` set, it calls an OpenAI-compatible chat endpoint, validates the response with `ast.parse`, and retries on invalid output.
+
+`quarantine.py` handles the PR side. It applies markers to the actual test source, formats a markdown PR body, then shells out to `gh pr create`. The shell layer is dependency-injected so the unit tests cover the full flow without touching git or GitHub.
+
+## PR autopost
+
+Once the detector has flagged a few tests, the agent can open a quarantine PR for you. Two flags drive the workflow:
+
+```bash
+# Dry run: apply markers locally, print the PR body, skip git and gh entirely.
+flaky-detector data/sample_history/ --dry-run-pr --tests-root tests/
+
+# Live: create a new branch, commit the marker changes, push, open a PR via gh.
+flaky-detector data/sample_history/ --open-pr --tests-root tests/
+```
+
+The branch name looks like `flaky-quarantine-20260511T100207`. The PR body lists each detected test with its flip pattern and reports whether the marker was applied, was already present, or had to be skipped.
+
+The marker insertion is idempotent. Re-running on the same tree picks up only newly flaky tests.
 
 ## Roadmap
 
-- v0.2: Codex / GPT-4 integration in `agent.py`.
-- v0.3: GitHub PR autopost. Flaky-detector opens a PR with quarantine markers plus the LLM's suggested fixes as diff comments.
-- v0.4: Storage layer. SQLite cache so repeated runs do not re-process the whole history.
+- v0.2: real OpenAI Chat Completions call in `agent.py`, with AST validation and retry. **Shipped.**
+- v0.3: quarantine PR autopost via `gh pr create`. Markers, branch, body, dry-run mode. **Shipped.**
+- v0.4: storage layer. SQLite cache so repeated runs do not re-process the whole history.
 - v0.5: pytest plugin mode. Run inside CI directly, write back to the same repo.
 
 ## Tests
