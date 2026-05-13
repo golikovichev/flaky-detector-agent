@@ -7,15 +7,85 @@ description: Detect flaky tests from CI history and propose LLM-validated fixes 
 
 Identify tests that flip pass/fail in CI without code changes, then quarantine them automatically with `@pytest.mark.flaky` markers and optional LLM-suggested fixes.
 
+## Installation
+
+Install from PyPI in any Python 3.10 or newer environment:
+
+```bash
+pip install flaky-detector-agent
+```
+
+Or install from source for the latest changes:
+
+```bash
+git clone https://github.com/golikovichev/flaky-detector-agent
+cd flaky-detector-agent
+pip install -e .
+```
+
+Authenticate the `gh` CLI once per machine so the agent can open pull requests on your behalf:
+
+```bash
+gh auth login
+```
+
+Optional: export `OPENAI_API_KEY` to enable LLM-generated fix suggestions:
+
+```bash
+export OPENAI_API_KEY=sk-...
+```
+
+Verify the install:
+
+```bash
+flaky-detector --help
+flaky-detector data/sample_history    # bundled sample with 3 known flakies
+```
+
 ## Quick Start
 
-When a user reports flaky tests, intermittent CI failures, or asks to analyze test stability:
+When a user reports flaky tests, intermittent CI failures, or asks to analyze test stability, follow this workflow with explicit verification at each step:
 
-1. **Locate the CI history**. Ask for a directory of JUnit XML files (one per CI run) or a single XML file. Most CI systems can publish these as artifacts.
-2. **Run the detector**: `flaky-detector <path> --min-flips 3 --window-days 14`. Tune flip count and window size to match the team's noise tolerance.
-3. **Review the flagged tests**. Each entry shows the flip pattern (for example `P F P F P`) and how many flips fall inside the window.
-4. **Open a quarantine PR**: add `--open-pr` to apply `@pytest.mark.flaky(reruns=2)` markers and open a draft pull request via the `gh` CLI.
-5. **Optional LLM fix snippets**: set `OPENAI_API_KEY` to attach AST-validated fix proposals to each entry in the PR body.
+### Step 1: Locate the CI history
+
+Ask for a directory of JUnit XML files (one per CI run) or a single XML file. Most CI systems can publish these as artifacts. Typical artifact paths:
+
+- GitHub Actions: `artifacts/junit/*.xml`
+- GitLab CI: `artifacts/test-results.xml`
+- Jenkins: `target/surefire-reports/*.xml`
+- CircleCI: stored in test results step
+
+**Verification:** the path passed to the detector must exist and contain at least one valid JUnit XML file.
+
+### Step 2: Run detection in preview mode first
+
+```bash
+flaky-detector data/junit-history --min-flips 3 --window-days 14
+```
+
+This prints the list of flagged tests with their flip patterns. **Verification:** confirm the flagged tests match the team's intuition before opening a PR. False positives waste reviewer time.
+
+### Step 3: Run with `--dry-run-pr` to inspect markers without git changes
+
+```bash
+flaky-detector data/junit-history --open-pr --dry-run-pr
+```
+
+This shows the markers the agent would apply and the PR body it would create, without touching git or calling `gh`. **Verification:** the PR body should list each flagged test with its pattern, the marker location, and (if `OPENAI_API_KEY` is set) the AST-validated fix snippet.
+
+### Step 4: Open the real PR
+
+Once the dry-run output looks correct:
+
+```bash
+flaky-detector data/junit-history --open-pr
+```
+
+This creates branch `flaky-quarantine-<timestamp>`, applies markers, commits all changes, opens a draft PR via `gh`. **Verification:** open the PR in the browser. Confirm the markers are on the right tests. Confirm the description is readable. Take it out of draft when ready to merge.
+
+### Step 5: Optional LLM fix snippets
+
+With `OPENAI_API_KEY` set before running `--open-pr`, the agent asks an LLM (Codex by default) for a candidate fix snippet for each flagged test. The agent runs the snippet through Python `ast.parse()` before attaching it. **Verification:** the snippet always parses (the AST pass guarantees this). Treat the snippet as a hint, not as final code; the reviewer should still understand and adapt it.
 
 ## What flaky tests are and why detection matters
 
@@ -107,14 +177,14 @@ A typical CI integration looks like this:
 3. If any flakies are detected, a draft PR is opened on the repo with markers applied.
 4. The QA team reviews the PR every Monday morning, merges if appropriate, and files real bug tickets for the underlying issues.
 
-## When to use this skill
+## Supporting documentation
 
-- A user reports tests failing randomly without code changes nearby
-- A team wants to triage CI flakiness across the last sprint
-- A maintainer needs to quarantine known-flaky tests before a release
-- A QA engineer is setting up flakiness detection in a new repo
+For deeper guidance see the bundled reference files:
 
-## When not to use this skill
+- [`references/flaky-patterns.md`](references/flaky-patterns.md): common root causes that produce the flip patterns this skill detects
+- [`references/quarantine-workflow.md`](references/quarantine-workflow.md): end-to-end CI integration with explicit checkpoints
+
+## When NOT to use this skill
 
 - The test suite has no JUnit XML output (use a different reporter first)
 - Failures correlate clearly with code changes (those are real bugs, not flakies)
