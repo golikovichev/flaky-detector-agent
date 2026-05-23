@@ -2,7 +2,7 @@
 
 Surface flaky tests from CI history. Propose fixes via an LLM agent.
 
-Status: alpha. Built for A.I. Agent Skills Hack Night, May 2026.
+> **Status: hackathon prototype.** Built in one day for A.I. Agent Skills Hack Night (Tessl × Neo4j × Hubble × OpenAI Codex, London, 13 May 2026). The code works for the heuristic it implements, but the project is not actively maintained. If you want production-grade Python testing tools from the same author, see [postman2pytest](https://github.com/golikovichev/postman2pytest) and [pytest-conversational](https://github.com/golikovichev/pytest-conversational).
 
 ## What it does
 
