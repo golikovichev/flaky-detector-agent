@@ -1,8 +1,17 @@
 # flaky-detector-agent
 
-Surface flaky tests from CI history. Propose fixes via an LLM agent.
+> ⚠️ **DEMO PROJECT. NO FURTHER DEVELOPMENT PLANNED.**
+>
+> Built in one day for the A.I. Agent Skills Hack Night (Tessl × Neo4j × Hubble × OpenAI Codex, London, 13 May 2026). This repository is preserved as evidence of the hackathon submission and is not maintained beyond that. The heuristic works for the cases it was tested on, but expect no patches, no PR reviews, and no new features.
+>
+> For production-grade Python testing tools from the same author, look here instead:
+>
+> - [postman2pytest](https://github.com/golikovichev/postman2pytest): convert Postman collections to runnable pytest suites
+> - [pytest-conversational](https://github.com/golikovichev/pytest-conversational): pytest plugin for multi-turn dialogue testing
+> - [secure-log2test](https://github.com/golikovichev/secure-log2test): convert Kibana log exports to pytest regression suites
+> - [phoenix2pytest](https://github.com/golikovichev/phoenix2pytest): convert Arize Phoenix LLM failure traces to pytest tests
 
-> **Status: hackathon prototype.** Built in one day for A.I. Agent Skills Hack Night (Tessl × Neo4j × Hubble × OpenAI Codex, London, 13 May 2026). The code works for the heuristic it implements, but the project is not actively maintained. If you want production-grade Python testing tools from the same author, see [postman2pytest](https://github.com/golikovichev/postman2pytest) and [pytest-conversational](https://github.com/golikovichev/pytest-conversational).
+Surface flaky tests from CI history. Propose fixes via an LLM agent.
 
 ## What it does
 
