@@ -1,4 +1,4 @@
-"""Pytest config — make src/ importable without installing the package."""
+"""Pytest config: make src/ importable without installing the package."""
 
 import sys
 from pathlib import Path

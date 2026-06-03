@@ -65,6 +65,6 @@ If a flagged test has none of the patterns above, treat the flag as a candidate 
 
 ## References
 
-- Google Testing Blog: «Where do our flaky tests come from?» (2016)
-- Microsoft Research: «An empirical analysis of flaky tests» (Luo et al., 2014)
+- Google Testing Blog: "Where do our flaky tests come from?" (2016)
+- Microsoft Research: "An empirical analysis of flaky tests" (Luo et al., 2014)
 - pytest documentation on `pytest-rerunfailures` and `pytest-flaky`
