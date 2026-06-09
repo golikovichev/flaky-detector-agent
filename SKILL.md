@@ -1,6 +1,6 @@
 ---
 name: flaky-detector
-description: Detect flaky tests from CI history and propose LLM-validated fixes via quarantine pull requests. Use when Claude needs to find flaky tests, analyze CI test stability, identify tests that flip pass/fail without code changes, or set up automated quarantine workflows. Supports any test framework that emits JUnit XML (pytest, unittest, JUnit, TestNG, Vitest, Jest with junit reporter). Trigger when users mention "flaky tests", "intermittent failures", "tests that randomly fail", "quarantine flaky tests", "CI flakiness", or ask to "find unreliable tests", "analyze CI history", "mark tests as flaky".
+description: Detect flaky tests from CI history and propose LLM-validated fixes via quarantine pull requests. Use to find flaky tests, analyze CI test stability, identify tests that flip pass/fail without code changes, or set up automated quarantine workflows. Supports any test framework that emits JUnit XML (pytest, unittest, JUnit, TestNG, Vitest, Jest with junit reporter). Trigger when users mention "flaky tests", "intermittent failures", "tests that randomly fail", "quarantine flaky tests", "CI flakiness", or ask to "find unreliable tests", "analyze CI history", "mark tests as flaky".
 ---
 
 # flaky-detector
@@ -85,7 +85,7 @@ This creates branch `flaky-quarantine-<timestamp>`, applies markers, commits all
 
 ### Step 5: Optional LLM fix snippets
 
-With `OPENAI_API_KEY` set before running `--open-pr`, the agent asks an LLM (Codex by default) for a candidate fix snippet for each flagged test. The agent runs the snippet through Python `ast.parse()` before attaching it. **Verification:** the snippet always parses (the AST pass guarantees this). Treat the snippet as a hint, not as final code; the reviewer should still understand and adapt it.
+With `OPENAI_API_KEY` set before running `--open-pr`, the agent asks an LLM (gpt-4o-mini by default) for a candidate fix snippet for each flagged test. The agent runs the snippet through Python `ast.parse()` before attaching it. **Verification:** the snippet always parses (the AST pass guarantees this). Treat the snippet as a hint, not as final code; the reviewer should still understand and adapt it.
 
 ## What flaky tests are and why detection matters
 
@@ -164,7 +164,7 @@ Detected 3 flaky test(s):
 
 ## LLM fix suggestions and AST validation
 
-When `OPENAI_API_KEY` is set, the agent asks an LLM (Codex by default) for a candidate fix snippet for each flagged test. The agent then runs the snippet through Python `ast.parse()` before attaching it to the PR body. If the snippet does not parse, it is dropped silently so only well-formed code reaches the PR.
+When `OPENAI_API_KEY` is set, the agent asks an LLM (gpt-4o-mini by default) for a candidate fix snippet for each flagged test. The agent then runs the snippet through Python `ast.parse()` before attaching it to the PR body. If the snippet does not parse, it is dropped silently so only well-formed code reaches the PR.
 
 This pattern keeps generated code honest. The reviewer always sees parseable Python, never half-broken strings.
 

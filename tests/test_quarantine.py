@@ -163,11 +163,7 @@ def test_apply_marker_skips_test_root_prefix(tmp_path):
 
 def test_apply_marker_preserves_existing_imports(tmp_path):
     tests_root = tmp_path / "tests"
-    body = (
-        "import os\n"
-        "import sys\n\n"
-        "def test_one():\n    assert True\n"
-    )
+    body = "import os\nimport sys\n\ndef test_one():\n    assert True\n"
     _write_test_file(tests_root, "test_imp", body)
     apply_quarantine_marker("tests.test_imp::test_one", tests_root)
     written = (tests_root / "test_imp.py").read_text(encoding="utf-8")
@@ -183,10 +179,21 @@ def test_apply_marker_preserves_existing_imports(tmp_path):
 
 
 def test_pr_body_lists_each_verdict():
-    verdicts = [_verdict("tests.test_a::test_one"), _verdict("tests.test_b::test_two", "PFPFP")]
+    verdicts = [
+        _verdict("tests.test_a::test_one"),
+        _verdict("tests.test_b::test_two", "PFPFP"),
+    ]
     edits = [
-        MarkerEdit(test_id="tests.test_a::test_one", file_path=Path("tests/test_a.py"), status="applied"),
-        MarkerEdit(test_id="tests.test_b::test_two", file_path=Path("tests/test_b.py"), status="already-marked"),
+        MarkerEdit(
+            test_id="tests.test_a::test_one",
+            file_path=Path("tests/test_a.py"),
+            status="applied",
+        ),
+        MarkerEdit(
+            test_id="tests.test_b::test_two",
+            file_path=Path("tests/test_b.py"),
+            status="already-marked",
+        ),
     ]
     body = format_pr_body(verdicts, edits)
     assert "Detected 2 flaky test(s)" in body
@@ -200,7 +207,9 @@ def test_pr_body_lists_each_verdict():
 def test_pr_body_handles_missing_edit_outcomes():
     verdicts = [_verdict("tests.test_c::test_x")]
     edits = [
-        MarkerEdit(test_id="tests.test_c::test_x", file_path=None, status="file-missing"),
+        MarkerEdit(
+            test_id="tests.test_c::test_x", file_path=None, status="file-missing"
+        ),
     ]
     body = format_pr_body(verdicts, edits)
     assert "file not found" in body
@@ -235,7 +244,9 @@ def test_create_pr_dry_run_skips_shell(tmp_path):
 def test_create_pr_invokes_git_and_gh(tmp_path):
     tests_root = tmp_path / "tests"
     _write_test_file(tests_root, "test_e", "def test_demo():\n    assert True\n")
-    runner = RecordingRunner(pr_url="https://github.com/golikovichev/flaky-detector-agent/pull/7")
+    runner = RecordingRunner(
+        pr_url="https://github.com/golikovichev/flaky-detector-agent/pull/7"
+    )
     result = create_quarantine_pr(
         [_verdict("tests.test_e::test_demo")],
         repo_root=tmp_path,
@@ -252,7 +263,9 @@ def test_create_pr_invokes_git_and_gh(tmp_path):
         ["git", "push"],
         ["gh", "pr"],
     ]
-    assert result.pr_url == "https://github.com/golikovichev/flaky-detector-agent/pull/7"
+    assert (
+        result.pr_url == "https://github.com/golikovichev/flaky-detector-agent/pull/7"
+    )
     assert result.branch_name == "flaky-quarantine-20260511T034501"
 
 

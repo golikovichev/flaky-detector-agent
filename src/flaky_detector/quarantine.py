@@ -44,6 +44,7 @@ def build_branch_name(now: Optional[datetime] = None) -> str:
     Format avoids underscores so it reads cleanly in `git branch` output.
     """
     from datetime import timezone
+
     stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%S")
     return f"flaky-quarantine-{stamp}"
 
@@ -128,9 +129,7 @@ def apply_quarantine_marker(test_id: str, tests_root: Path) -> MarkerEdit:
 
     # Already-marked check: the line directly above target is the marker.
     if target_index > 0 and lines[target_index - 1].strip() == MARKER_LINE:
-        return MarkerEdit(
-            test_id=test_id, file_path=file_path, status="already-marked"
-        )
+        return MarkerEdit(test_id=test_id, file_path=file_path, status="already-marked")
 
     new_lines = list(lines)
     new_lines.insert(target_index, MARKER_LINE)
@@ -153,10 +152,14 @@ def format_pr_body(
 ) -> str:
     """Render a markdown body listing each verdict and the edit outcome."""
     lines: list[str] = []
-    lines.append("Automated quarantine of flaky tests detected by flaky-detector-agent.")
+    lines.append(
+        "Automated quarantine of flaky tests detected by flaky-detector-agent."
+    )
     lines.append("")
-    lines.append(f"Detected {len(verdicts)} flaky test(s). "
-                 "Each entry below carries the flip pattern from CI history.")
+    lines.append(
+        f"Detected {len(verdicts)} flaky test(s). "
+        "Each entry below carries the flip pattern from CI history."
+    )
     lines.append("")
     by_id = {e.test_id: e for e in edits}
     for v in verdicts:
@@ -196,7 +199,9 @@ def format_pr_body(
 GhRunner = Callable[[Sequence[str], Path], "subprocess.CompletedProcess[str]"]
 
 
-def _default_gh_runner(args: Sequence[str], cwd: Path) -> "subprocess.CompletedProcess[str]":
+def _default_gh_runner(
+    args: Sequence[str], cwd: Path
+) -> "subprocess.CompletedProcess[str]":
     """Real subprocess invocation. Replaced by injected runner in tests."""
     return subprocess.run(  # noqa: S603
         list(args), cwd=cwd, check=True, capture_output=True, text=True
@@ -262,7 +267,9 @@ def create_quarantine_pr(
         ["gh", "pr", "create", "--title", title, "--body", body],
         repo_root,
     )
-    result.pr_url = (completed.stdout or "").strip().splitlines()[-1] if completed.stdout else None
+    result.pr_url = (
+        (completed.stdout or "").strip().splitlines()[-1] if completed.stdout else None
+    )
     return result
 
 

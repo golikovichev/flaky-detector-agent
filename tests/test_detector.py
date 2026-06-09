@@ -18,7 +18,9 @@ def test_detector_finds_three_seeded_flakes():
         "tests.test_checkout::test_checkout_timeout",
         "tests.test_search::test_search_index_warmup",
     }
-    assert expected.issubset(flagged_ids), f"expected {expected} subset of {flagged_ids}"
+    assert expected.issubset(flagged_ids), (
+        f"expected {expected} subset of {flagged_ids}"
+    )
 
 
 def test_detector_ignores_stable_tests():

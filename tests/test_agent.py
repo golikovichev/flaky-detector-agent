@@ -1,6 +1,5 @@
 """Agent stub tests."""
 
-from datetime import datetime
 from pathlib import Path
 
 from flaky_detector.agent import FixProposal, propose_fix

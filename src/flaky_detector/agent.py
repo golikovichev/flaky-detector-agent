@@ -42,6 +42,7 @@ class FixProposal:
 # Stub path (deterministic fallback, no network)
 # ---------------------------------------------------------------------------
 
+
 def _stub_proposal(verdict: FlakyVerdict) -> FixProposal:
     """Quarantine-only proposal. Used when no LLM is available."""
     pattern = " ".join("F" if r.is_failure else "P" for r in verdict.evidence)
@@ -68,6 +69,7 @@ def _stub_proposal(verdict: FlakyVerdict) -> FixProposal:
 # ---------------------------------------------------------------------------
 # AST validation
 # ---------------------------------------------------------------------------
+
 
 def is_valid_python(code: str) -> bool:
     """Return True if the snippet parses as a Python module.
@@ -122,7 +124,9 @@ Be terse. No preamble. No closing remarks."""
 class FixProposer:
     """Build FixProposals. Calls LLM if api_key + use_llm, else returns stub."""
 
-    api_key: Optional[str] = field(default_factory=lambda: os.environ.get("OPENAI_API_KEY"))
+    api_key: Optional[str] = field(
+        default_factory=lambda: os.environ.get("OPENAI_API_KEY")
+    )
     model: str = "gpt-4o-mini"
     use_llm: bool = True
     max_retries: int = 2
@@ -198,7 +202,9 @@ def _pick_failure_message(verdict: FlakyVerdict) -> str:
     return ""
 
 
-def _default_openai_call(*, prompt: str, api_key: str, model: str, timeout: float) -> dict:
+def _default_openai_call(
+    *, prompt: str, api_key: str, model: str, timeout: float
+) -> dict:
     """Real OpenAI Chat Completions call. Lazy import so the package is optional."""
     try:
         from openai import OpenAI
@@ -224,7 +230,10 @@ def _default_openai_call(*, prompt: str, api_key: str, model: str, timeout: floa
 # Convenience function (keeps backward-compatible API from skeleton commit)
 # ---------------------------------------------------------------------------
 
-def propose_fix(verdict: FlakyVerdict, *, proposer: Optional[FixProposer] = None) -> FixProposal:
+
+def propose_fix(
+    verdict: FlakyVerdict, *, proposer: Optional[FixProposer] = None
+) -> FixProposal:
     """Backward-compatible single-call helper. Stub by default."""
     if proposer is None:
         proposer = FixProposer(use_llm=False)

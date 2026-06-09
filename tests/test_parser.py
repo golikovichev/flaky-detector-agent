@@ -57,4 +57,5 @@ def test_is_failure_property():
 
 def _now():
     from datetime import datetime
+
     return datetime(2026, 5, 7)

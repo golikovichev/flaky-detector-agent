@@ -83,8 +83,10 @@ def main(argv: list[str] | None = None) -> int:
         window_days=args.window_days,
     )
 
-    print(f"Scanned {len(runs)} test executions across "
-          f"{len({r.run_id for r in runs})} CI runs.")
+    print(
+        f"Scanned {len(runs)} test executions across "
+        f"{len({r.run_id for r in runs})} CI runs."
+    )
 
     if not verdicts:
         print("No flaky tests detected.")
@@ -94,9 +96,7 @@ def main(argv: list[str] | None = None) -> int:
     for v in verdicts:
         print(f"  - {v.test_id}")
         print(f"      {v.reason}")
-        last_outcomes = " ".join(
-            "F" if r.is_failure else "P" for r in v.evidence
-        )
+        last_outcomes = " ".join("F" if r.is_failure else "P" for r in v.evidence)
         print(f"      pattern: {last_outcomes}")
         print()
 
@@ -110,8 +110,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Branch: {result.branch_name}")
         applied = sum(1 for e in result.edits if e.status == "applied")
         already = sum(1 for e in result.edits if e.status == "already-marked")
-        missing = sum(1 for e in result.edits if e.status in {"file-missing", "function-missing"})
-        print(f"Markers: {applied} applied, {already} already present, {missing} skipped.")
+        missing = sum(
+            1 for e in result.edits if e.status in {"file-missing", "function-missing"}
+        )
+        print(
+            f"Markers: {applied} applied, {already} already present, {missing} skipped."
+        )
         if result.dry_run:
             print("Dry run, no git or gh calls made. PR body preview:")
             print("---")

@@ -53,11 +53,7 @@ def parse_junit_xml(path: str | Path) -> list[TestRun]:
     suites = root.findall(".//testsuite") if root.tag == "testsuites" else [root]
     for suite in suites:
         suite_name = suite.attrib.get("name", "unknown")
-        run_id = (
-            suite.attrib.get("run-id")
-            or suite.attrib.get("id")
-            or path.stem
-        )
+        run_id = suite.attrib.get("run-id") or suite.attrib.get("id") or path.stem
         ts_raw = suite.attrib.get("timestamp", "")
         timestamp = _parse_timestamp(ts_raw)
 
@@ -99,7 +95,9 @@ def _build_test_id(case: ET.Element) -> str:
 def _classify_outcome(case: ET.Element) -> tuple[str, str]:
     failure = case.find("failure")
     if failure is not None:
-        return "failed", failure.attrib.get("message", "") or (failure.text or "").strip()
+        return "failed", failure.attrib.get("message", "") or (
+            failure.text or ""
+        ).strip()
 
     error = case.find("error")
     if error is not None:

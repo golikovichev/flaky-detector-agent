@@ -1,9 +1,7 @@
 """Tests for FixProposer (LLM live path) using mock chat_call."""
 
-from datetime import datetime
 from pathlib import Path
 
-import pytest
 
 from flaky_detector.agent import (
     FixProposal,
@@ -11,7 +9,7 @@ from flaky_detector.agent import (
     is_valid_python,
 )
 from flaky_detector.detector import detect_flaky
-from flaky_detector.parser import TestRun, parse_directory
+from flaky_detector.parser import parse_directory
 
 SAMPLE_DIR = Path(__file__).parent.parent / "data" / "sample_history"
 
@@ -26,6 +24,7 @@ def _first_verdict():
 # ---------------------------------------------------------------------------
 # is_valid_python
 # ---------------------------------------------------------------------------
+
 
 def test_is_valid_python_accepts_clean_snippet():
     assert is_valid_python("# fix: pin random seed before generating test data")
@@ -49,6 +48,7 @@ def test_is_valid_python_rejects_empty():
 # Stub path (no API key, no use_llm)
 # ---------------------------------------------------------------------------
 
+
 def test_stub_path_when_use_llm_false():
     verdict = _first_verdict()
     proposer = FixProposer(api_key="dummy", use_llm=False)
@@ -69,6 +69,7 @@ def test_stub_path_when_no_api_key():
 # ---------------------------------------------------------------------------
 # Mocked LLM happy path
 # ---------------------------------------------------------------------------
+
 
 def _good_chat_response(*, prompt: str, model: str) -> dict:
     return {
@@ -98,6 +99,7 @@ def test_live_path_returns_proposal_with_valid_code():
 # ---------------------------------------------------------------------------
 # Mocked LLM retry path
 # ---------------------------------------------------------------------------
+
 
 class _RetryHarness:
     """Returns invalid output until reach_after attempts then a valid one."""
@@ -149,6 +151,7 @@ def test_retry_falls_back_to_stub_when_exhausted():
 # ---------------------------------------------------------------------------
 # Mocked LLM exception path
 # ---------------------------------------------------------------------------
+
 
 def test_exception_in_chat_call_falls_back_to_stub():
     def boom(**kwargs):
