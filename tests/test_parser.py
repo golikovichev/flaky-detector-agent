@@ -55,6 +55,46 @@ def test_is_failure_property():
     assert not fake_skip.is_failure
 
 
+_MIXED_TZ_XML = """<testsuites>
+  <testsuite name="s" timestamp="2026-01-01T00:00:00Z" run-id="r1">
+    <testcase classname="pkg.T" name="test_x" time="1"><failure message="boom"/></testcase>
+  </testsuite>
+  <testsuite name="s" timestamp="2026-01-02T00:00:00" run-id="r2">
+    <testcase classname="pkg.T" name="test_x" time="1"/>
+  </testsuite>
+  <testsuite name="s" run-id="r3">
+    <testcase classname="pkg.T" name="test_x" time="1"><failure message="boom"/></testcase>
+  </testsuite>
+</testsuites>"""
+
+
+def test_parsed_timestamps_are_all_timezone_aware(tmp_path):
+    """A file mixing a Z suffix, a bare (offset-less) stamp, and a missing stamp
+    must yield timestamps of one consistent awareness. Otherwise sorting or
+    subtracting them downstream raises 'can't compare offset-naive and
+    offset-aware datetimes'."""
+    xml_file = tmp_path / "mixed_tz.xml"
+    xml_file.write_text(_MIXED_TZ_XML, encoding="utf-8")
+
+    runs = parse_junit_xml(xml_file)
+
+    assert len(runs) == 3
+    assert all(r.timestamp.tzinfo is not None for r in runs)
+
+
+def test_mixed_timezone_history_does_not_crash_detector(tmp_path):
+    """The realistic downstream path: detect_flaky must sort mixed-source runs
+    without a TypeError."""
+    from flaky_detector.detector import detect_flaky
+
+    xml_file = tmp_path / "mixed_tz.xml"
+    xml_file.write_text(_MIXED_TZ_XML, encoding="utf-8")
+    runs = parse_junit_xml(xml_file)
+
+    # Just needs to run without raising; verdict content is not the point here.
+    detect_flaky(runs, min_flips=1)
+
+
 def _now():
     from datetime import datetime
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterator
 
@@ -111,10 +111,22 @@ def _classify_outcome(case: ET.Element) -> tuple[str, str]:
 
 
 def _parse_timestamp(raw: str) -> datetime:
+    """Parse a JUnit timestamp into an always timezone-aware (UTC) datetime.
+
+    Real JUnit exports mix formats: some carry a ``Z`` or numeric offset
+    (timezone-aware), some a bare offset-less stamp, and some omit it. If the
+    parser returned a mix of aware and naive datetimes, sorting or subtracting
+    them in the detector raises "can't compare offset-naive and offset-aware
+    datetimes". Normalising every result to UTC keeps the history comparable.
+    An offset-less stamp is assumed to be UTC.
+    """
     if not raw:
-        return datetime.now()
+        return datetime.now(timezone.utc)
     raw = raw.strip().replace("Z", "+00:00")
     try:
-        return datetime.fromisoformat(raw)
+        parsed = datetime.fromisoformat(raw)
     except ValueError:
-        return datetime.now()
+        return datetime.now(timezone.utc)
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
