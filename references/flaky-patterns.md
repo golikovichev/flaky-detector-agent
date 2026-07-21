@@ -14,6 +14,10 @@ A flip is a transition between failure states (pass to fail or fail to pass). In
 | `P F F F P` | Threshold flake; system at the edge of timeout limits |
 | `F F P P P` followed by stability | Old bug fixed, history before window cutoff still shows it |
 
+## Why flip count, not failure rate
+
+The detector counts outcome flips rather than a raw failure rate on purpose. A `F F F P P P` test has a 50 percent failure rate but is broken on one side and fixed on the other, not flaky. A `P F P F P` test has the same failure rate but is the classic flaky signature. Counting transitions separates genuinely intermittent tests from consistently broken ones that a failure-rate threshold would lump together.
+
 ## Common root causes
 
 ### Timing issues

@@ -26,7 +26,7 @@ flaky-detector data/sample_history        # bundled sample with 3 known flakies
 
 Work through the steps in order, checking the output of each before moving on.
 
-1. **Locate the CI history.** Point the detector at a directory of JUnit XML files (one per CI run) or a single file. Most CI systems publish these as artifacts (GitHub Actions `artifacts/junit/*.xml`, GitLab `artifacts/test-results.xml`, Jenkins `target/surefire-reports/*.xml`). The path must exist and hold at least one valid JUnit XML file.
+1. **Locate the CI history.** Point the detector at a directory of JUnit XML files (one per CI run) or a single file; most CI systems publish these as build artifacts. The path must exist and hold at least one valid JUnit XML file.
 2. **Preview detection.** `flaky-detector data/junit-history --min-flips 3 --window-days 14` prints the flagged tests and their flip patterns. Confirm they match the team's intuition before going further; false positives waste reviewer time.
 3. **Dry-run the PR.** `flaky-detector data/junit-history --open-pr --dry-run-pr` shows the markers and PR body without touching git or `gh`. The body should list each test with its pattern, the marker location, and (if `OPENAI_API_KEY` is set) the validated fix snippet.
 4. **Open the PR.** `flaky-detector data/junit-history --open-pr` creates branch `flaky-quarantine-<timestamp>`, applies markers, commits, and opens a draft PR via `gh`. Open it in the browser, confirm the markers sit on the right tests, then take it out of draft when ready.
@@ -36,7 +36,7 @@ Work through the steps in order, checking the output of each before moving on.
 
 A test is flagged when it shows **3 or more outcome flips inside any 14-day sliding window** (both thresholds configurable via `--min-flips` and `--window-days`). A flip is a transition between pass and fail. Always-failing tests (broken, not flaky) and always-passing tests are ignored, as are single blips under the threshold.
 
-Flip count is used rather than failure rate on purpose: a `F F F P P P` test has a 50 percent failure rate but is broken-then-fixed, while `P F P F P` is the classic flaky signature. The detector surfaces candidates by counting flips; it does not classify root causes. See `references/flaky-patterns.md` for the root-cause taxonomy behind the patterns and `references/quarantine-workflow.md` for end-to-end CI integration with checkpoints.
+The detector surfaces candidates by counting flips; it does not classify root causes. See `references/flaky-patterns.md` for why flip count beats failure rate and the root-cause taxonomy, and `references/quarantine-workflow.md` for end-to-end CI integration with checkpoints.
 
 ## Inputs
 
